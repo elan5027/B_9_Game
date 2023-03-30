@@ -3,10 +3,17 @@ import character
 import battle
 import random
 import os
-# 메인 흐름과 전투의 동작 부분.
+from inventory import show_inventory
 
 
-def create_job():
+# 이름  :   select_job
+# 인자  :   없음
+# 역할  :   직업의 정보를 보여주고 값을 입력받기 위한 함수
+# 반환  :   선택한 직업의 이름
+# 설명  :   존재하는 직업의 정보를 보여주고 값을 입력받는다.
+
+
+def select_job():
     joblist = list(map(str, table.job_table.keys()))
 
     print("============ 직업 선택 ==============")
@@ -15,16 +22,31 @@ def create_job():
 
     while (True):
         print("직업 이름은 한글로 입력하세요.")
-        job2 = input("직업 : ")
-        if job2 in joblist:
-            return job2
+        jobname = input("직업 : ")
+        if jobname in joblist:
+            return jobname
         else:
             print("잘못 된 입력값 입니다.")
+            continue
+
+# 이름  :   create_user
+# 인자  :   없음
+# 역할  :   캐릭터를 생성하기 위한 함수
+# 반환  :
+#   - 구성된 정보로 캐릭터 클레스의 인스턴스를 반환한다.
+#   - 만약, 유저의 이름값이 비어있다면 함수를 재귀적 호출한다.
+# 설명  :
+#   - select_job 함수에서 직업이름을 받아온다.
+#   - 받아온 이름으로 job_table에서 해당 직업의 설정값을 받아온다.
 
 
 def create_user():
     name = input("이름 : ")
-    job = create_job()
+    if not name:
+        print("비어있는 값을 입력하였습니다.")
+        os.system("pause")
+        return create_user()
+    job = select_job()
     userset = table.job_table[job]
     if job == "전사":
         return character.Warrior(name, userset)
@@ -32,10 +54,16 @@ def create_user():
         return character.Archer(name, userset)
     elif job == "마법사":
         return character.Wizard(name, userset)
-    else:
-        print("잘못된 값을 입력하였습니다.")
-        os.system("pause")
-        return create_user()
+
+
+# 이름  :  create_monster
+# 인자  :  monsters (몬스터 리스트), num (몬스터 생성 수)
+# 역할  :  몬스터를 인자값으로 받아온 수만큼 생성하는 함수
+# 반환  :  없음
+# 설명  :
+#   - 랜덤한 값으로 몬스터의 이름을 가져온다.
+#   - 가져온 이름을 통해 해당 몬스터의 설정값을 가져온다.
+#   - 인자값 monsters 리스트에 몬스터의 객체를 추가한다.
 
 
 def create_monster(monsters, num):
@@ -43,8 +71,15 @@ def create_monster(monsters, num):
         index = random.randint(0, len(table.monter_name_list)-1)
         name = table.monter_name_list[index]
         userset = table.monster_table[name]
-        # Player 생성시 추가값있으면 수정.
         monsters.append(character.Monster(name, userset))
+
+# 이름  :   create_team:
+# 인자  :   users (유저 리스트)
+# 역할  :   사용자로부터 입력받은 수 만큼 유저를 생성하는 함수
+# 반환  :   값이 유효하지 않을경우 재귀적 호출
+# 설명  :
+#   - 유저에게 숫자값을 입력받고 해당 수 만큼 유저의 목록 리스트에 추가한다.
+#   - 입력받은 값이 0~3 사이의 정수인지 검사하여 올바른 값만 받도록 한다.
 
 
 def create_team(users):
@@ -65,7 +100,14 @@ def create_team(users):
 
     else:
         print("잘못된 값입니다.")
-        return create_team()
+        return create_team(users)
+
+# 이름  :   view_stage
+# 인자  :   i (정수 값)
+# 역할  :   유저가 현재 위치하는 스테이지의 정보 출력
+# 반환  :   없음
+# 설명  :
+#   - 인자값으로 받아온 스테이지 위치정보를 기반으로 총 10층의 스테이지를 콘솔창에 그려준다.
 
 
 def view_stage(i):
@@ -78,54 +120,14 @@ def view_stage(i):
             print(f"==     {10-j}층      ==")
         print("==================")
 
-
-def show_inventory(inventory, users):
-    os.system("cls||clear")
-    print("==  인벤토리 ==")
-    if not inventory:
-        print("인벤토리가 비어있습니다.")
-        return 0
-
-    for key, value in inventory.items():
-        print(f"{key} : {value}")
-    use_item_select(inventory, users)
-
-
-def item_value_max(item_value, user):
-    if item_value[0] == 'hp':
-        heal = (user.hp + item_value[1]) - \
-            min(user.hp + item_value[1], user.max_hp)
-        total_heal = item_value[1] - heal
-        user.hp = total_heal
-        print(f"{user.name}의 체력이 {total_heal}만큼 회복하였다.")
-    elif item_value[0] == 'mp':
-        heal = (user.mp + item_value[1]) - \
-            min(user.mp + item_value[1], user.max_mp)
-        total_heal = item_value[1] - heal
-        user.mp = total_heal
-        print(f"{user.name}의 마나가 {total_heal}만큼 회복하였다.")
-
-
-def use_item_select(inventory, users):
-    print("인벤토리를 닫으려면 [ q ] 를 입력해주세요.")
-    cmd = input("사용할 아이템을 입력하세요 : ")
-    if cmd in inventory:
-        item_value = table.item_value[cmd]
-        if inventory[cmd] == 1:
-            for user in users:
-                item_value_max(item_value, user)
-            inventory.pop(cmd)
-
-        elif inventory[cmd] > 1:
-            for user in users:
-                item_value_max(item_value, user)
-            inventory[cmd] -= 1
-    elif str.lower(cmd) == 'q':
-        print("인벤토리를 닫습니다.")
-        return 0
-    else:
-        print("잘못된 입력입니다.")
-        return show_inventory(inventory, users)
+# 이름  :   start
+# 인자  :   없음
+# 역할  :   게임이 시작되면 사실상 가장먼저 실행되는 메인 함수.
+# 반환  :   없음
+# 설명  :
+#   - 최초 실행시 각종 설정값을 세팅하고 유저가 할수 있는일을 그려준다.
+#   - 선택된 행동하는 함수를 호출해준다.
+#   - 유저가 전투에서 패배 또는 사용자가 종료할때 까지 무한히 반복한다.
 
 
 def start():
