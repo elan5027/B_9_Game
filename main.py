@@ -26,7 +26,16 @@ def create_user():
     name = input("이름 : ")
     job = create_job()
     userset = [name]+table.job_table[job]
-    return character.Player(userset) #Player 생성시 추가값있으면 수정.
+    if job == "전사":
+        return character.Warrior(userset)
+    elif job == "궁수":
+        return character.Archer(userset)
+    elif job == "마법사":
+        return character.Wizard(userset)
+    else:
+        print("잘못된 값을 입력하였습니다.")
+        os.system("pause")
+        return create_user()
 
 def create_monster(monsters, num):
     for i in range(0, num):
@@ -39,7 +48,7 @@ def create_monster(monsters, num):
 def create_team(users):
     print("같이 행동할 동료의 숫자를 골라주세요.")
     cmd = input("동료의 수 [0 ~ 3] : ")
-    if cmd.isalnum():
+    if cmd.isnumeric():
         cmd = int(cmd)
     else :
         return create_team(users)
@@ -68,6 +77,50 @@ def view_stage(i):
             print("==================")
             print(f"==     {10-j}층      ==")
         print("==================")
+
+def show_inventory(inventory, users):
+    os.system("cls||clear")
+    print("==  인벤토리 ==")
+    if not inventory:
+        print("인벤토리가 비어있습니다.")
+        return 0
+    
+    for key, value in inventory.items():
+        print(f"{key} : {value}")
+    use_item_select(inventory, users)
+
+def item_value_max(item_value ,user):
+    if item_value[0] == 'hp':
+        heal = (user.hp + item_value[1]) - min(user.hp + item_value[1] , user.max_hp)
+        total_heal = item_value[1] - heal
+        user.hp = total_heal 
+        print(f"{user.name}의 체력이 {total_heal}만큼 회복하였다.")
+    elif item_value[0] == 'mp':
+        heal = (user.mp + item_value[1]) - min(user.mp + item_value[1] , user.max_mp)
+        total_heal = item_value[1] - heal
+        user.mp = total_heal 
+        print(f"{user.name}의 마나가 {total_heal}만큼 회복하였다.")
+
+def use_item_select(inventory, users):
+    print("인벤토리를 닫으려면 [ q ] 를 입력해주세요.")
+    cmd = input("사용할 아이템을 입력하세요 : ")
+    if cmd in inventory:
+        item_value = table.item_value[cmd]
+        if inventory[cmd] == 1:
+            for user in users:
+                item_value_max(item_value ,user)
+            inventory.pop(cmd)
+            
+        elif inventory[cmd] > 1:
+            for user in users:
+                item_value_max(item_value ,user)
+            inventory[cmd] -= 1
+    elif str.lower(cmd) == 'q':
+        print("인벤토리를 닫습니다.")
+        return 0 
+    else:
+        print("잘못된 입력입니다.")
+        return show_inventory(inventory, users)
 
 
 def start():
@@ -99,11 +152,7 @@ def start():
                 return start()
             stage += 1
         elif cmd == '3':
-            print("==  인벤토리 ==")
-            for key, value in inventory.items():
-                print(f"{key} : {value}")
-            #사용 부분 추가예정.
-            
+            show_inventory(inventory, users)
             os.system('pause')
         elif cmd == '0':
             exit()

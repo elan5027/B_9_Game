@@ -42,14 +42,10 @@ class Character:
         if target.hp == 0:
             print(f'{target.name}(이)가 쓰러졌습니다')
     
-    
-    
     def show_status(self):
         print(f"이름 : {self.name} ")
         print(f"체력 : {self.hp} / {self.max_hp}")
         
-## 1. 직업별로 클레스를 추가해서 magic_attack을 오버라이딩 하여 사용하는 방법 고려.
-## 2. 아이템 착용 고려.
 class Player(Character):
     def __init__(self, stat):
         super().__init__(stat)
@@ -65,16 +61,15 @@ class Player(Character):
         ## 아이템을 가질 클레스
         self.item = []
         
-    
+
     def get_exp(self, exp):
         self.exp += exp
         if self.exp >= self.required_exp:
-            self.level()
-            self.exp -= self.required_exp
+            self.player_level_up()
+
     
     #레벨 업
     def player_level_up(self):
-        self.exp -= self.get_level_up * self.level
         self.level += 1
         self.max_hp += 10
         self.hp = self.max_hp
@@ -86,19 +81,31 @@ class Player(Character):
         self.required_exp = self.get_level_up * self.level
         print(f"{self.name}이 레벨 업 하였습니다.현재 레벨: {self.level}")
     
+    def get_damege(self, scale):
+        damage = self.magic_power*scale
+        return damage
+
+
+    # 변경을해서 마나가 유효한지 판단하는걸로 바꾸고
+    def is_mana(self, mp):
+        if self.mp < mp :
+            print("마나가 부족합니다.")
+            return False
+        else :
+            return True
+
     def magic_attack(self, target):
         # 랜덤 값은 생각해봅시다!
-        if self.mp < 10 :
-            print("마나가 부족합니다.")
-            return
-        else :
-            self.mp -= 10
-            #damage = int(self.magic_power*random.randint(0.8, 1.2))
-            damage = int(self.magic_power*random.uniform(0.8, 1.2))
-            target.hp = max(target.hp - damage, 0)
-            print(f'{self.name}의 공격 {target.name}에게 {damage}의 데미지를 입혔습니다')
-            if target.hp == 0:
-                print(f'{target.name}(이)가 쓰러졌습니다')
+            mana = self.is_mana()
+            if mana:
+                self.mp -= 10
+                print(f'{self.name}의 공격 {target.name}에게 {damage}의 데미지를 입혔습니다')
+                
+                damage = int(self.magic_power*random.uniform(0.8, 1.2))
+                target.hp = max(target.hp - damage, 0)
+                
+                if target.hp == 0:
+                    print(f'{target.name}(이)가 쓰러졌습니다')
 
     #상태창
     def show_status(self):
@@ -108,48 +115,101 @@ class Player(Character):
         print(f"레벨 : {self.level}")
         print(f"경험치 : {self.exp} / {self.required_exp}")
         print("=============================================")
+        
+## 1. 직업별로 특수공격
+class Warrior(Player):
+    def __init__(self, stat):
+        super().__init__(stat)
+        self.job = "전사"
+        self.magic_power = 2*stat[4] #전사는 마법 공격력이 낮게
+
+    def magic_attack(self, target):
+        mp = 10
+        mana = self.is_mana(mp)
+        if mana:
+            self.mp -= mp
+            damage = self.magic_power*2
+            print(f"{self.job}{self.name}의 특수 공격 {target.name}에게 {damage}의 데미지를 입혔습니다.")
+            target.hp = max(target.hp - damage, 0)
+                    
+            if target.hp == 0:
+                print(f'{target.name}(이)가 쓰러졌습니다')
+        else :
+            print("마나가 부족합니다.")
+
+class Wizard(Player):
+    def __init__(self, stat):
+        super().__init__(stat)
+        self.job = "마법사"
+        self.magic_power = 6*stat[4] #마법사는 마법 공격력이 높게
+
+    def magic_attack(self, target):
+        mp = 20
+        mana = self.is_mana(mp)
+        if mana:
+            self.mp -= mp
+            damage = self.magic_power*4
+            print(f"{self.job}{self.name}의 특수 공격 {target.name}에게 {damage}의 데미지를 입혔습니다.")
+            target.hp = max(target.hp - damage, 0)
+                    
+            if target.hp == 0:
+                print(f'{target.name}(이)가 쓰러졌습니다')
+        else :
+            print("마나가 부족합니다.")
+
+class Archer(Player):
+    def __init__(self, stat):
+        super().__init__(stat)
+        self.job = "궁수"
+        self.magic_power = 4*stat[4] #궁수는 마법 공격력이 중간
+
+    #애만 사용됨.
+    def magic_attack(self, target):
+        mp = 15
+        mana = self.is_mana(mp)
+        if mana:
+            self.mp -= mp
+            damage = self.magic_power*3
+            print(f"{self.job}{self.name}의 특수 공격 {target.name}에게 {damage}의 데미지를 입혔습니다.")
+            target.hp = max(target.hp - damage, 0)
+                    
+            if target.hp == 0:
+                print(f'{target.name}(이)가 쓰러졌습니다')
+        else :
+            print("마나가 부족합니다.")
+
+## 2. 아이템 착용 고려.
+
 
 
 # 보상 및 아이템 --> 경험치 뭐 주는지, 드랍테이블에서 가져오기..?
 class Monster(Character):
     def __init__(self, stat): 
         super().__init__(stat)
-        #여기에 경험치줄꺼 리스트에서 받아올지 아니면 따로 만들지.
-    # 노말어택은 상속받아서 쓰면됨니다.
-    # 몬스터가 가질 속성.  
-    # 몬스터가 몇의 경험치를 줄지.
-    # 몬스터의 타입을 설정한다던지 몬스터별로. 추가 데미지 or 감소 데미지.
-    # 몬스터마다 피가 일정이하로 내려가면 스킬을 쓴다던지.
-    # 아이템 뭐로 드랍할지. 확률로 할지 확정으로 할지.
-
-    # 속성을 판단할 함수를 만들고
-    # 실질적인 동작은 다른함수에서 속성을 받아와서 그속성에 따라 계산.
-    # 속성이란게 그냥 몬스터가 "단단함" <= 이 특성 이 특성은 일반공격을 데미지 덜받는다.
-    # 동물(늑대 곰) 동물2 (박쥐 거미) 판타지(슬라임 고블린) 보스 (골렘) 
-    # 대부분 같은 값을 고유스킬있다면 그거빼고 그럼 상속시키면 추가되는거만 적으면됩니다.
+    
     #확률적으로 몬스터가 아무런 행동을 하지 않음
     def wait(self):
         print(f"{self.name}이(가) 잠시 숨을 고릅니다.")
     #박쥐,거미가 일반공격 대신 확률적으로 흡혈 사용
     # 0~10 10% 휴식(공격안함) 20%로 흡혈공격 70% 일반공격
-    
-    # =======================
-    # 1.텍스트 문구 추가필요
-    # 2.흡혈로 차는 체력이 최대체력을 오버할 수 있음 의도된것인지? 
-    
     # =======================
     def absorb(self,target):
         absorb_damage = int(self.normal_power*0.3)
         target.hp = max(target.hp - absorb_damage, 0)
-        self.hp = (self.hp + absorb_damage)
-        
+        absorb_need = (self.hp + absorb_damage) - min(self.hp + absorb_damage , self.max_hp)
+        total_absorb = absorb_damage - absorb_need
+        self.hp += total_absorb
+        print(f"{self.name}이(가) {target.name}에게 흡혈하였습니다!")
+        print(f"{target.name}은(는) {absorb_damage}만큼의 데미지를 입었습니다.")
+        print(f"{self.name}은(는) {total_absorb}만큼 회복하였다.")
 
-    
     def drop_item(self):
-        drop_monster = monster_table.get(self.name)
-        drop_item = list(map(str, drop_monster[3]))
-       #if {self.hp} <= 0:  #다른 부분에서 이미 검증 재검증 필요 X
-        print(f"{self.name}에게서 {drop_item}을 획득하였다!")
+        drop_list = monster_table[self.name][3]
+        #drop_item_list = list(map(str, drop_monster[3]))
+        drop_item = []
+        for _drop_item in drop_list:
+            print(f"{self.name}에게서 {_drop_item}을 획득하였다!")
+            drop_item.append(_drop_item)          
         return drop_item
 
     def drop_exp(self, target):

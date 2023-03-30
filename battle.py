@@ -3,7 +3,7 @@
 
 import random
 import os
-
+from main import show_inventory
 
 
 
@@ -12,7 +12,7 @@ def select_monster(monsters):
     for i, mon in enumerate(monsters):
         print(f"{i}. 이름 : {mon.name} HP : {mon.hp}")
     index = input(f"[ 0 ~ {len(monsters)-1} ]")
-    if index.isalnum():
+    if index.isnumeric():
         index = int(index)
     else :
         return select_monster(monsters)
@@ -94,46 +94,65 @@ def show_monsters(users, monsters):
     for mon in monsters:
         mon.show_status()
 
+def select_battle_menu():
+    print("1.공격 개시")
+    print("2.아이템 사용")
+    cmd = input("골라주세요 ")
+    if cmd.isdigit() and (cmd == '1' or cmd == '2') :
+        return cmd
+    else :
+        return select_battle_menu()
+    
+
 def battle(users, monsters, inventory):
+    
     print("전투를 시작합니다.")
     while(True):
         show_monsters(users, monsters)
-        #선택지 유형 추가. 1. 공격 , 2. 아이템 사용 
-        #유저 수만큼 공격 방법 설정하고 공격하기.
-        
-        for user in users:
-            if isalive(user):
-                user_attack(user, monsters)
         if is_win_lose(users):
             lose()
             os.system("pause")
             return False
-
-        ## 사망판단.
-        for mon in monsters:
-            monster_attack(users, mon)
-        if is_win_lose(monsters):
-            for mon in monsters:
-                for user in users:
-                    user.get_exp(mon.drop_exp(user))
-            
-            drop_item = mon.drop_item()
-            print(drop_item)
-            print(inventory.keys())
-            if len(drop_item) > 1:
-                for item in drop_item:
-                    if item in inventory.keys():
-                        inventory[item] += 1
-                    else :
-                        inventory[item] = 1
-            if drop_item[0] in inventory.keys():
-                inventory[drop_item[0]] += 1
-            else :
-                inventory[drop_item[0]] = 1
+        elif is_win_lose(monsters):
             win()
             os.system("pause")
-            
             return True
+        else :
+            menu = select_battle_menu()
+
+        if menu == '1':
+            for user in users:
+                if isalive(user):
+                    user_attack(user, monsters)
+            if is_win_lose(users):
+                lose()
+                os.system("pause")
+                return False
+            
+            for mon in monsters:
+                print(mon.hp)
+                monster_attack(users, mon)
+            if is_win_lose(monsters):
+                drop_item = []
+                for mon in monsters:
+                    mon_drop = mon.drop_item()
+                    if len(mon_drop) > 1:
+                        for item in mon_drop:
+                            drop_item.append(item)
+                    else :
+                        drop_item.append(mon_drop[0])
+                    for user in users:
+                        user.get_exp(mon.drop_exp(user))
+                for item in drop_item:
+                    if str(item) in inventory.keys(): #에러발생.
+                        inventory[str(item)] += 1
+                    else :
+                        inventory[str(item)] = 1
+                win()
+                os.system("pause")
+                return True
+        elif menu == '2':
+            show_inventory(inventory, users)
         
         os.system("pause")
         os.system('cls||clear')
