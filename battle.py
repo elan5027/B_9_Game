@@ -100,6 +100,7 @@ def battle(users, monsters, inventory):
         show_monsters(users, monsters)
         #선택지 유형 추가. 1. 공격 , 2. 아이템 사용 
         #유저 수만큼 공격 방법 설정하고 공격하기.
+        
         for user in users:
             if isalive(user):
                 user_attack(user, monsters)

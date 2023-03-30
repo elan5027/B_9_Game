@@ -103,6 +103,7 @@ def start():
             for key, value in inventory.items():
                 print(f"{key} : {value}")
             #사용 부분 추가예정.
+            
             os.system('pause')
         elif cmd == '0':
             exit()

@@ -136,6 +136,7 @@ class Monster(Character):
     # =======================
     # 1.텍스트 문구 추가필요
     # 2.흡혈로 차는 체력이 최대체력을 오버할 수 있음 의도된것인지? 
+    
     # =======================
     def absorb(self,target):
         absorb_damage = int(self.normal_power*0.3)
