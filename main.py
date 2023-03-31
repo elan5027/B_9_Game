@@ -46,6 +46,10 @@ def create_user():
     if not name:
         print("비어있는 값을 입력하였습니다.")
         os.system("pause")
+        # 재귀형식.  값을 입력받을때. 유효성 검사. 
+        # 무언가를 입력받을때는 사용자로부터 유효성 무조건 해야됩니다 내가 의도한 데이터를 입력햇는지.
+        # 만약, 의도를 무시한 입력을 햇다면. 입력이 되면안되겟죠?
+        # 그 경우 이때까지는 무한반복문을 통해서 올바른값이 입력될때까지 반복되게.
         return create_user()
     job = select_job()
     userset = table.job_table[job]
@@ -86,12 +90,12 @@ def create_monster(monsters, num):
 def create_team(users):
     print("같이 행동할 동료의 숫자를 골라주세요.")
     cmd = input("동료의 수 [0 ~ 3] : ")
-    if cmd.isnumeric():
-        cmd = int(cmd)
+    if cmd.isnumeric():         
+        cmd = int(cmd)      
     else:
         return create_team(users)
-    if 0 <= int(cmd) <= 3:
-        for i in range(0, int(cmd)+1):
+    if 0 <= cmd <= 3:          # 입력값이 0~3이게.
+        for i in range(0, (cmd+1)):
             os.system("cls||clear")
             if i == 0:
                 print("주인공의 이름은 ? : ")
@@ -136,6 +140,7 @@ def start():
     stage = 1
     users = []
     monsters = []
+    
     os.system("cls||clear")
     create_team(users)
     while (True):

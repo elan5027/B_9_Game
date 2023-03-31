@@ -3,6 +3,21 @@ import os
 from inventory import show_inventory
 from character import Player
 
+# 이름 : select_battle_menu
+# 인자 : 없음
+# 역할 : 전투 메뉴를 선택하는 함수
+# 반환 : 선택한 메뉴 번호(1 또는 2)
+# 설명 : 전투 메뉴를 출력하고 사용자로부터 입력을 받아 선택한 메뉴 번호를 반환합니다.
+
+def select_battle_menu():
+    print("1.공격 개시")
+    print("2.아이템 사용")
+    cmd = input("메뉴를 선택해 주세요 [1 ~ 2] ")  
+    if cmd.isdigit() and (cmd == '1' or cmd == '2'):   #정수값만.
+        return cmd
+    else:
+        return select_battle_menu()
+
 
 # 이름 : select_monster
 # 인자 : monsters(몬스터 리스트)
@@ -13,7 +28,7 @@ from character import Player
 # 설명 : 몬스터 리스트에서 사용자가 선택한 몬스터를 반환합니다.
 
 def select_monster(monsters):
-    print("어떤 몬스터를 공격하시겟습니까? ")
+    print("어떤 몬스터를 공격하시겠습니까? ")
     for i, monster in enumerate(monsters):
         print(f"{i}. 이름 : {monster.name} HP : {monster.hp}")
     index = input(f"[ 0 ~ {len(monsters)-1} ]")
@@ -22,10 +37,10 @@ def select_monster(monsters):
     else:
         return select_monster(monsters)
     for i, mon in enumerate(monsters):
-        if i == index and alive_check(mon):
+        if i == index and alive_check(mon): # 3번째의 몬스터라면 얘가 살았냐?
             return index
 
-    print("잘못된 선택이거나 이미 사망한 몬스터를 선택하셧습니다.")
+    print("잘못된 선택이거나 이미 사망한 몬스터를 선택하셨습니다.")
     return select_monster(monsters)
 
 
@@ -75,7 +90,7 @@ def monster_attack(users, monster):
 
         if attck_type == 1:
             monster.wait()
-        elif 4 >= attck_type >= 2:
+        elif 4 >= attck_type >= 2 :
             monster.absorb(users[random_user])
         else:
             addtional = random.randint(0,3)
@@ -85,6 +100,47 @@ def monster_attack(users, monster):
     else:
         return monster_attack(users, monster)
 
+
+# 이름 : looting
+# 인자 : monsters(몬스터 리스트), users(유저 리스트)
+# 역할 : 몬스터가 드랍한 아이템을 획득하고 경험치를 얻는 함수입니다.
+# 반환 : 없음
+# 설명 : 
+#   - 몬스터의 리스트를 순회하며 아이템리스트에 아이템 추가 및 유저에게 경험치를 추가한다.
+#   - 받아온 아이템 리스트를 순회하며 유저가 공통적으로 관리하는 Player 객체안의 inventory에 아이템을 추가한다.
+
+def looting(monsters, users):
+    drop_item = []
+    for monster in monsters:
+        monster_drop = monster.drop_item()
+        if len(monster_drop) > 1:  #2개이상의 아이템이 담겻을 경우.
+            for item in monster_drop:
+                drop_item.append(item)
+        else:
+            drop_item.append(monster_drop[0]) 
+        for user in users:
+            user.get_exp(monster.drop_exp(user))
+
+    for item in drop_item:
+        if str(item) in Player.inventory.keys():  #딕셔너리의 키값에는 리스트가 들어가지 않기때문에 주의하셔야됩니다.
+            Player.inventory[str(item)] += 1
+        else:
+            Player.inventory[str(item)] = 1
+
+
+# 이름 : show_monsters
+# 인자 : users(유저 리스트), monsters(몬스터 리스트)
+# 역할 : 유저와 몬스터의 상태를 출력하는 함수
+# 반환 : 없음
+# 설명 : 유저와 몬스터의 상태를 출력합니다.
+
+def show_monsters(users, monsters):
+    print("==   아군   ==")
+    for user in users:
+        user.show_status()
+    print("==   적군   ==")
+    for mon in monsters:
+        mon.show_status()
 
 # 이름 : alive_check
 # 인자 : chricter(캐릭터)
@@ -107,10 +163,10 @@ def alive_check(chricter):
 
 def dead_check_list(chricters):
     users = len(chricters)
-    count = 0
+    count = 0  # 죽은놈 숫자체크 용도.
     for user in chricters:
         if not alive_check(user):
-            count += 1
+            count += 1  #죽을대마다 1씩 증가.
     if users == count:
         return True
     else:
@@ -123,63 +179,6 @@ def win():
 
 def lose():
     print("패배하였습니다.")
-
-
-# 이름 : show_monsters
-# 인자 : users(유저 리스트), monsters(몬스터 리스트)
-# 역할 : 유저와 몬스터의 상태를 출력하는 함수
-# 반환 : 없음
-# 설명 : 유저와 몬스터의 상태를 출력합니다.
-
-def show_monsters(users, monsters):
-    print("==   아군   ==")
-    for user in users:
-        user.show_status()
-    print("==   적군   ==")
-    for mon in monsters:
-        mon.show_status()
-
-
-# 이름 : select_battle_menu
-# 인자 : 없음
-# 역할 : 전투 메뉴를 선택하는 함수
-# 반환 : 선택한 메뉴 번호(1 또는 2)
-# 설명 : 전투 메뉴를 출력하고 사용자로부터 입력을 받아 선택한 메뉴 번호를 반환합니다.
-
-def select_battle_menu():
-    print("1.공격 개시")
-    print("2.아이템 사용")
-    cmd = input("메뉴를 선택해 주세요 [1 ~ 2] ")
-    if cmd.isdigit() and (cmd == '1' or cmd == '2'):
-        return cmd
-    else:
-        return select_battle_menu()
-
-
-# 이름 : looting
-# 인자 : monsters(몬스터 리스트), users(유저 리스트)
-# 역할 : 몬스터가 드랍한 아이템을 획득하고 경험치를 얻는 함수입니다.
-# 반환 : 없음
-# 설명 : 
-#   - 몬스터의 리스트를 순회하며 아이템리스트에 아이템 추가 및 유저에게 경험치를 추가한다.
-#   - 받아온 아이템 리스트를 순회하며 유저가 공통적으로 관리하는 Player 객체안의 inventory에 아이템을 추가한다.
-
-def looting(monsters, users):
-    drop_item = []
-    for monster in monsters:
-        monster_drop = monster.drop_item()
-        if len(monster_drop) > 1:
-            for item in monster_drop:
-                drop_item.append(item)
-        else:
-            drop_item.append(monster_drop[0])
-        for user in users:
-            user.get_exp(monster.drop_exp(user))
-    for item in drop_item:
-        if str(item) in Player.inventory.keys():
-            Player.inventory[str(item)] += 1
-        else:
-            Player.inventory[str(item)] = 1
 
 
 # 이름 : battle

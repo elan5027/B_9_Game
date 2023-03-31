@@ -51,9 +51,10 @@ def item_value_check(item_value, user):
 def use_item_select(users):
     print("인벤토리를 닫으려면 [ q, Q ] 를 입력해주세요.")
     cmd = input("사용할 아이템을 입력하세요 : ")
+    
     if cmd in Player.inventory:
         item_value = table.item_value.get(cmd)
-        if Player.inventory[cmd] == 1:
+        if Player.inventory[cmd] == 1:   
             for user in users:
                 item_value_check(item_value, user)
             Player.inventory.pop(cmd)
