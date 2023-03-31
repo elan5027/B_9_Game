@@ -48,7 +48,6 @@ def item_value_check(item_value, user):
 # 반환 : 값이 유효하지 않을 경우 재귀적 호출.
 # 설명 : 인벤토리에서 아이템을 선택하여 사용합니다
 
-
 def use_item_select(users):
     print("인벤토리를 닫으려면 [ q, Q ] 를 입력해주세요.")
     cmd = input("사용할 아이템을 입력하세요 : ")

@@ -14,7 +14,6 @@ from inventory import show_inventory
 # 반환  :   선택한 직업의 이름
 # 설명  :   존재하는 직업의 정보를 보여주고 값을 입력받는다.
 
-
 def select_job():
     joblist = list(map(str, table.job_table.keys()))
 
@@ -31,6 +30,7 @@ def select_job():
             print("잘못 된 입력값 입니다.")
             continue
 
+
 # 이름  :   create_user
 # 인자  :   없음
 # 역할  :   캐릭터를 생성하기 위한 함수
@@ -40,7 +40,6 @@ def select_job():
 # 설명  :
 #   - select_job 함수에서 직업이름을 받아온다.
 #   - 받아온 이름으로 job_table에서 해당 직업의 설정값을 받아온다.
-
 
 def create_user():
     name = input("이름 : ")
@@ -67,7 +66,6 @@ def create_user():
 #   - 가져온 이름을 통해 해당 몬스터의 설정값을 가져온다.
 #   - 인자값 monsters 리스트에 몬스터의 객체를 추가한다.
 
-
 def create_monster(monsters, num):
     for i in range(0, num):
         monter_name_list = list(map(str, table.monster_table.keys()))
@@ -76,6 +74,7 @@ def create_monster(monsters, num):
         userset = table.monster_table[name]
         monsters.append(Monster(name, userset))
 
+
 # 이름  :   create_team:
 # 인자  :   users (유저 리스트)
 # 역할  :   사용자로부터 입력받은 수 만큼 유저를 생성하는 함수
@@ -83,7 +82,6 @@ def create_monster(monsters, num):
 # 설명  :
 #   - 유저에게 숫자값을 입력받고 해당 수 만큼 유저의 목록 리스트에 추가한다.
 #   - 입력받은 값이 0~3 사이의 정수인지 검사하여 올바른 값만 받도록 한다.
-
 
 def create_team(users):
     print("같이 행동할 동료의 숫자를 골라주세요.")
@@ -105,13 +103,13 @@ def create_team(users):
         print("잘못된 값입니다.")
         return create_team(users)
 
+
 # 이름  :   view_stage
 # 인자  :   i (정수 값)
 # 역할  :   유저가 현재 위치하는 스테이지의 정보를 출력하는 함수
 # 반환  :   없음
 # 설명  :
 #   - 인자값으로 받아온 스테이지 위치정보를 기반으로 총 10층의 스테이지를 콘솔창에 그려준다.
-
 
 def view_stage(i):
     for j in range(0, 10):
@@ -123,6 +121,7 @@ def view_stage(i):
             print(f"==     {10-j}층      ==")
         print("==================")
 
+
 # 이름  :   start
 # 인자  :   없음
 # 역할  :   게임이 시작되면 사실상 가장먼저 실행되는 메인 함수
@@ -131,7 +130,6 @@ def view_stage(i):
 #   - 최초 실행시 각종 설정값을 세팅하고 유저가 할수 있는일을 그려준다.
 #   - 선택된 행동하는 함수를 호출해준다.
 #   - 유저가 전투에서 패배 또는 사용자가 종료할때 까지 무한히 반복한다.
-
 
 def start():
 
