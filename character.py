@@ -23,6 +23,8 @@ class Character:
 
 
 class Player(Character, metaclass=ABCMeta):
+    inventory = {}
+
     def __init__(self, name, stat):
         super().__init__(name, stat)
         self.max_mp = stat['mp']

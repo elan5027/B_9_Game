@@ -1,6 +1,7 @@
 import random
 import os
 from inventory import show_inventory
+from character import Player
 
 
 # 이름 : select_monster
@@ -12,15 +13,15 @@ from inventory import show_inventory
 # 설명 : 몬스터 리스트에서 사용자가 선택한 몬스터를 반환합니다.
 def select_monster(monsters):
     print("어떤 몬스터를 공격하시겟습니까? ")
-    for i, mon in enumerate(monsters):
-        print(f"{i}. 이름 : {mon.name} HP : {mon.hp}")
+    for i, monster in enumerate(monsters):
+        print(f"{i}. 이름 : {monster.name} HP : {monster.hp}")
     index = input(f"[ 0 ~ {len(monsters)-1} ]")
     if index.isnumeric():
         index = int(index)
     else:
         return select_monster(monsters)
     for i, mon in enumerate(monsters):
-        if i == index and isalive(mon):
+        if i == index and alive_check(mon):
             return index
 
     print("잘못된 선택이거나 이미 사망한 몬스터를 선택하셧습니다.")
@@ -34,10 +35,11 @@ def select_monster(monsters):
 
 
 def user_attack(user, monsters):
-    if is_win_lose(monsters):
+    if dead_check_list(monsters):
         return
-
-    action = input("어떤 공격을 사용하시겠습니까? (1: 일반 공격, 2: 마법 공격)")
+    print("1. 일반 공격")
+    print("2. 마법 공격")
+    action = input("어떤 공격을 사용하시겠습니까? [ 1 ~ 2 ]")
     if action == '1':
         index = select_monster(monsters)
         user.normal_attack(monsters[index])
@@ -58,16 +60,15 @@ def user_attack(user, monsters):
 
 
 def monster_attack(users, monster):
-    if is_win_lose(users):
+    if dead_check_list(users):
         return
-    if not isalive(monster):
-        return
+
     if len(users) != 1:
         random_user = random.randint(0, len(users)-1)
     else:
         random_user = 0
 
-    if isalive(users[random_user]):
+    if alive_check(users[random_user]):
         attck_type = random.randint(0, 10)
 
         if attck_type == 0:
@@ -79,31 +80,31 @@ def monster_attack(users, monster):
     else:
         return monster_attack(users, monster)
 
-# 이름 : isalive
+# 이름 : alive_check
 # 인자 : chricter(캐릭터)
 # 역할 : 캐릭터가 살아있는지 확인하는 함수
 # 반환 : 살아있으면 True, 아니면 False
 # 설명 : 캐릭터가 살아있는지 확인합니다.
 
 
-def isalive(chricter):
+def alive_check(chricter):
     if chricter.hp > 0:
         return True
     else:
         return False
 
-# 이름 : is_win_lose
+# 이름 : dead_check_list
 # 인자 : chricters(캐릭터 리스트)
 # 역할 : 캐릭터가 모두 죽었는지 확인하는 함수
 # 반환 : 모두 죽었으면 True, 아니면 False
 # 설명 : 캐릭터 리스트에서 모든 캐릭터가 죽었는지 확인합니다.
 
 
-def is_win_lose(chricters):
+def dead_check_list(chricters):
     users = len(chricters)
     count = 0
     for user in chricters:
-        if not isalive(user):
+        if not alive_check(user):
             count += 1
     if users == count:
         return True
@@ -143,7 +144,7 @@ def show_monsters(users, monsters):
 def select_battle_menu():
     print("1.공격 개시")
     print("2.아이템 사용")
-    cmd = input("골라주세요 ")
+    cmd = input("메뉴를 선택해 주세요 [1 ~ 2] ")
     if cmd.isdigit() and (cmd == '1' or cmd == '2'):
         return cmd
     else:
@@ -160,55 +161,52 @@ def select_battle_menu():
 #   - 메뉴 1을 선택하면 유저가 몬스터에게 공격하고, 메뉴 2를 선택하면 인벤토리를 확인할 수 있다.
 
 
-def battle(users, monsters, inventory):
+def battle(users, monsters):
 
     print("전투를 시작합니다.")
     while (True):
-        show_monsters(users, monsters)
-        if is_win_lose(users):
+
+        if dead_check_list(users):
             lose()
             os.system("pause")
             return False
-        elif is_win_lose(monsters):
+        
+        #몬스터가 다죽어있는지 판단.
+        #다죽었으면 배틀에서 승리하여 전리품을 플레이어에게 전달한다.
+        elif dead_check_list(monsters):
+            drop_item = []
+            for monster in monsters:
+                monster_drop = monster.drop_item()
+                if len(monster_drop) > 1:
+                    for item in monster_drop:
+                        drop_item.append(item)
+                else:
+                    drop_item.append(monster_drop[0])
+                for user in users:
+                    user.get_exp(monster.drop_exp(user))
+            for item in drop_item:
+                if str(item) in Player.inventory.keys():
+                    Player.inventory[str(item)] += 1
+                else:
+                    Player.inventory[str(item)] = 1
             win()
             os.system("pause")
             return True
         else:
+            show_monsters(users, monsters)
             menu = select_battle_menu()
 
         if menu == '1':
             for user in users:
-                if isalive(user):
+                if alive_check(user):
                     user_attack(user, monsters)
-            if is_win_lose(users):
-                lose()
-                os.system("pause")
-                return False
 
-            for mon in monsters:
-                print(mon.hp)
-                monster_attack(users, mon)
-            if is_win_lose(monsters):
-                drop_item = []
-                for mon in monsters:
-                    mon_drop = mon.drop_item()
-                    if len(mon_drop) > 1:
-                        for item in mon_drop:
-                            drop_item.append(item)
-                    else:
-                        drop_item.append(mon_drop[0])
-                    for user in users:
-                        user.get_exp(mon.drop_exp(user))
-                for item in drop_item:
-                    if str(item) in inventory.keys():
-                        inventory[str(item)] += 1
-                    else:
-                        inventory[str(item)] = 1
-                win()
-                os.system("pause")
-                return True
+            for monster in monsters:
+                if alive_check(monster):
+                    monster_attack(users, monster)
+
         elif menu == '2':
-            show_inventory(inventory, users)
+            show_inventory(users)
 
         os.system("pause")
         os.system('cls||clear')

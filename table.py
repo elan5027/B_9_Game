@@ -31,4 +31,3 @@ monster_table = {
     '골렘': {'hp': 180, 'normal_power': 30, 'exp': 50, 'item': ["회복물약(대)", "마나물약(대)"]}
 }
 
-monter_name_list = list(map(str, monster_table.keys()))

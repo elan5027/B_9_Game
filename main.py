@@ -1,8 +1,10 @@
-import table
-import character
+
+
 import battle
 import random
 import os
+import table
+from character import Warrior, Wizard, Monster, Archer
 from inventory import show_inventory
 
 
@@ -49,11 +51,11 @@ def create_user():
     job = select_job()
     userset = table.job_table[job]
     if job == "전사":
-        return character.Warrior(name, userset)
+        return Warrior(name, userset)
     elif job == "궁수":
-        return character.Archer(name, userset)
+        return Archer(name, userset)
     elif job == "마법사":
-        return character.Wizard(name, userset)
+        return Wizard(name, userset)
 
 
 # 이름  :  create_monster
@@ -68,10 +70,11 @@ def create_user():
 
 def create_monster(monsters, num):
     for i in range(0, num):
-        index = random.randint(0, len(table.monter_name_list)-1)
-        name = table.monter_name_list[index]
+        monter_name_list = list(map(str, table.monster_table.keys()))
+        index = random.randint(0, len(monter_name_list)-1)
+        name = monter_name_list[index]
         userset = table.monster_table[name]
-        monsters.append(character.Monster(name, userset))
+        monsters.append(Monster(name, userset))
 
 # 이름  :   create_team:
 # 인자  :   users (유저 리스트)
@@ -131,10 +134,10 @@ def view_stage(i):
 
 
 def start():
+
     stage = 1
     users = []
     monsters = []
-    inventory = {}
     os.system("cls||clear")
     create_team(users)
     while (True):
@@ -144,7 +147,7 @@ def start():
         print("2. 전투 하기")
         print("3. 인벤토리 보기")
         print("0. 종료하기")
-        cmd = input("고르시오 : ")
+        cmd = input("메뉴를 선택해 주세요 [0 ~ 3] : ")
         if cmd == '1':
             for user in users:
                 user.show_status()
@@ -154,12 +157,12 @@ def start():
             print(f"탑 {stage}층에 입장합니다.")
             monsters.clear()
             create_monster(monsters, stage)
-            iswin = battle.battle(users, monsters, inventory)
+            iswin = battle.battle(users, monsters)
             if not iswin:
                 return start()
             stage += 1
         elif cmd == '3':
-            show_inventory(inventory, users)
+            show_inventory(users)
             os.system('pause')
         elif cmd == '0':
             exit()
