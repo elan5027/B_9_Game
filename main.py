@@ -46,19 +46,23 @@ def create_user():
     if not name:
         print("비어있는 값을 입력하였습니다.")
         os.system("pause")
-        # 재귀형식.  값을 입력받을때. 유효성 검사. 
-        # 무언가를 입력받을때는 사용자로부터 유효성 무조건 해야됩니다 내가 의도한 데이터를 입력햇는지.
-        # 만약, 의도를 무시한 입력을 햇다면. 입력이 되면안되겟죠?
-        # 그 경우 이때까지는 무한반복문을 통해서 올바른값이 입력될때까지 반복되게.
         return create_user()
     job = select_job()
     userset = table.job_table[job]
-    if job == "전사":
-        return Warrior(name, userset)
-    elif job == "궁수":
-        return Archer(name, userset)
-    elif job == "마법사":
-        return Wizard(name, userset)
+    doc = {
+        '전사': Warrior(name, userset),
+        '궁수': Archer(name, userset),
+        '마법사': Wizard(name, userset)
+    }
+    if job in doc:
+        return doc[job]
+    
+    # if job == "전사":
+    #     return Warrior(name, userset)
+    # elif job == "궁수":
+    #     return Archer(name, userset)
+    # elif job == "마법사":
+    #     return Wizard(name, userset)
 
 
 # 이름  :  create_monster
@@ -88,13 +92,15 @@ def create_monster(monsters, num):
 #   - 입력받은 값이 0~3 사이의 정수인지 검사하여 올바른 값만 받도록 한다.
 
 def create_team(users):
+    MAX_MEMBER = 3
+
     print("같이 행동할 동료의 숫자를 골라주세요.")
-    cmd = input("동료의 수 [0 ~ 3] : ")
-    if cmd.isnumeric():         
-        cmd = int(cmd)      
+    cmd = input(f"동료의 수 [0 ~ {MAX_MEMBER}] : ")
+    if cmd.isnumeric():
+        cmd = int(cmd)
     else:
         return create_team(users)
-    if 0 <= cmd <= 3:          # 입력값이 0~3이게.
+    if 0 <= cmd <= MAX_MEMBER:          # 입력값이 0~3이게.
         for i in range(0, (cmd+1)):
             os.system("cls||clear")
             if i == 0:
@@ -106,7 +112,7 @@ def create_team(users):
     else:
         print("잘못된 값입니다.")
         return create_team(users)
-
+    
 
 # 이름  :   view_stage
 # 인자  :   i (정수 값)
@@ -140,21 +146,29 @@ def start():
     stage = 1
     users = []
     monsters = []
-    
+    main_menu = {
+        '1': '팀 정보 확인',
+        '2': '전투 입장',
+        '3': '인벤토리 열기',
+        'exit': '종료하기'
+    }
     os.system("cls||clear")
     create_team(users)
     while (True):
         os.system('cls||clear')
         view_stage(stage)
-        print("1. 상태창 보기")
-        print("2. 전투 하기")
-        print("3. 인벤토리 보기")
-        print("0. 종료하기")
-        cmd = input("메뉴를 선택해 주세요 [0 ~ 3] : ")
+        for key, value in main_menu.items():
+            print(f"{key}. {value}")
+
+        cmd = input("메뉴를 선택해 주세요 : ")
+        if not cmd in main_menu:
+            continue
+
         if cmd == '1':
             for user in users:
                 user.show_status()
             os.system('pause')
+
         elif cmd == '2':
             os.system('cls||clear')
             print(f"탑 {stage}층에 입장합니다.")
@@ -164,10 +178,12 @@ def start():
             if not iswin:
                 return start()
             stage += 1
+
         elif cmd == '3':
             show_inventory(users)
             os.system('pause')
-        elif cmd == '0':
+
+        else:
             exit()
 
 

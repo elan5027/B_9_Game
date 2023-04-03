@@ -15,7 +15,7 @@ class Character:
         self.max_hp = stat['hp']
         self.hp = self.max_hp
         self.normal_power = stat['normal_power']
-    
+        
     # 이름 : normal_attack
     # 인자 : self(인스턴스 자신), target(normal_attack 메소드를 적용할 대상)
     # 역할 : 캐릭터가 normal_attack을 할 때 호출되는 함수
@@ -45,6 +45,16 @@ class Player(Character, metaclass=ABCMeta):
         self.exp = 0
         self.get_level_up = 100
         self.required_exp = self.get_level_up * self.level
+        self.action = {
+            '1':{
+                "verbose":"일반 공격",
+                "action":self.normal_attack
+            },
+            '2':{
+                "verbose":"특수 공격",
+                "action":self.magic_attack
+            }
+        }
 
         self.item = []
 
